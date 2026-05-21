@@ -36,8 +36,8 @@ React Dashboard -> FastAPI Backend -> MongoDB Atlas -> PySpark Batch Processing 
 2. Update `backend/.env` with your MongoDB connection and Ollama Cloud API credentials:
    ```
    OLLAMA_API_KEY=your_ollama_cloud_api_key
-   OLLAMA_BASE_URL=https://api.ollama.cloud
-   OLLAMA_MODEL=llama2:70b
+   OLLAMA_BASE_URL=https://ollama.com
+   OLLAMA_MODEL=gpt-oss:20b
    ```
 3. Install backend dependencies:
    ```bash
@@ -87,7 +87,7 @@ React Dashboard -> FastAPI Backend -> MongoDB Atlas -> PySpark Batch Processing 
 
 - Replace placeholder API keys and hashed passwords before production use.
 - Use MongoDB Atlas connection string in `backend/.env`.
-- The LLM module uses Ollama Cloud with llama2:70b model (free tier).
+- The LLM module uses Ollama Cloud with the configured `OLLAMA_MODEL`.
 - Use `backend/scripts/sample_data.py` to seed sample documents in MongoDB.
 
 ## Next Improvements

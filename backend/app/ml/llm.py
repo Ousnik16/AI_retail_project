@@ -1,5 +1,6 @@
 import httpx
 from app.core.config import settings
+from app.utils.ollama import ollama_api_url
 
 class RetailLLM:
     def __init__(self):
@@ -22,7 +23,7 @@ class RetailLLM:
             }
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"{self.base_url}/api/generate",
+                    ollama_api_url(self.base_url, "generate"),
                     json=payload,
                     headers=headers,
                     timeout=60.0

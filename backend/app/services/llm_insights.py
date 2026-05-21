@@ -2,6 +2,7 @@ import httpx
 from app.core.config import settings
 from app.db.database import get_collection
 from app.services.analytics import AnalyticsService
+from app.utils.ollama import ollama_api_url
 
 class LLMInsightsService:
     @staticmethod
@@ -88,7 +89,7 @@ class LLMInsightsService:
             }
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"{settings.OLLAMA_BASE_URL}/api/generate",
+                    ollama_api_url(settings.OLLAMA_BASE_URL, "generate"),
                     json=payload,
                     headers=headers,
                     timeout=60.0

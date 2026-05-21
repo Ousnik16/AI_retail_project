@@ -15,9 +15,9 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ]
-    OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "https://api.ollama.cloud")
+    OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "https://ollama.com")
     OLLAMA_API_KEY: str = os.getenv("OLLAMA_API_KEY", "")
-    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama2:70b")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
     class Config:
