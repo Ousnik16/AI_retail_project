@@ -1,0 +1,27 @@
+transaction_id,user_id,purchased_at,channel,season,product_id,product_name,category,quantity,unit_price,line_total,basket_size,transaction_total
+TX-0001,customer@retail.ai,2026-02-21T09:00:00,online,regular,laptop-pro-15,Laptop Pro 15,Computers,1,1299.00,1299.00,4,1446.00
+TX-0001,customer@retail.ai,2026-02-21T09:00:00,online,regular,wireless-mouse,Wireless Mouse,Accessories,1,39.00,39.00,4,1446.00
+TX-0001,customer@retail.ai,2026-02-21T09:00:00,online,regular,laptop-bag,Laptop Bag,Bags,1,59.00,59.00,4,1446.00
+TX-0001,customer@retail.ai,2026-02-21T09:00:00,online,regular,usb-c-hub,USB-C Hub,Accessories,1,49.00,49.00,4,1446.00
+TX-0002,alice@example.com,2026-02-28T14:30:00,store,regular,gaming-monitor,Gaming Monitor,Displays,1,329.00,329.00,3,457.00
+TX-0002,alice@example.com,2026-02-28T14:30:00,store,regular,mechanical-keyboard,Mechanical Keyboard,Accessories,1,89.00,89.00,3,457.00
+TX-0002,alice@example.com,2026-02-28T14:30:00,store,regular,wireless-mouse,Wireless Mouse,Accessories,1,39.00,39.00,3,457.00
+TX-0003,bob@example.com,2026-03-03T18:20:00,mobile,regular,tablet-air,Tablet Air,Tablets,1,549.00,549.00,2,748.00
+TX-0003,bob@example.com,2026-03-03T18:20:00,mobile,regular,noise-cancelling-headphones,Noise Cancelling Headphones,Audio,1,199.00,199.00,2,748.00
+TX-0004,mira@example.com,2026-03-12T11:15:00,online,regular,smartwatch-fit,Smartwatch Fit,Wearables,1,179.00,179.00,1,179.00
+TX-0005,customer@retail.ai,2026-03-24T16:45:00,store,regular,laptop-pro-15,Laptop Pro 15,Computers,1,1299.00,1299.00,3,1387.00
+TX-0005,customer@retail.ai,2026-03-24T16:45:00,store,regular,wireless-mouse,Wireless Mouse,Accessories,1,39.00,39.00,3,1387.00
+TX-0005,customer@retail.ai,2026-03-24T16:45:00,store,regular,usb-c-hub,USB-C Hub,Accessories,1,49.00,49.00,3,1387.00
+TX-0006,alice@example.com,2026-04-02T10:05:00,online,regular,4k-webcam,4K Webcam,Cameras,1,119.00,119.00,2,168.00
+TX-0006,alice@example.com,2026-04-02T10:05:00,online,regular,usb-c-hub,USB-C Hub,Accessories,1,49.00,49.00,2,168.00
+TX-0007,bob@example.com,2026-04-11T20:10:00,mobile,regular,gaming-monitor,Gaming Monitor,Displays,1,329.00,329.00,2,418.00
+TX-0007,bob@example.com,2026-04-11T20:10:00,mobile,regular,mechanical-keyboard,Mechanical Keyboard,Accessories,1,89.00,89.00,2,418.00
+TX-0008,mira@example.com,2026-04-18T12:00:00,store,regular,laptop-bag,Laptop Bag,Bags,2,59.00,118.00,2,196.00
+TX-0008,mira@example.com,2026-04-18T12:00:00,store,regular,wireless-mouse,Wireless Mouse,Accessories,2,39.00,78.00,2,196.00
+TX-0009,customer@retail.ai,2026-05-01T09:40:00,online,regular,laptop-pro-15,Laptop Pro 15,Computers,1,1299.00,1299.00,2,1358.00
+TX-0009,customer@retail.ai,2026-05-01T09:40:00,online,regular,laptop-bag,Laptop Bag,Bags,1,59.00,59.00,2,1358.00
+TX-0010,alice@example.com,2026-05-09T15:25:00,mobile,regular,noise-cancelling-headphones,Noise Cancelling Headphones,Audio,1,199.00,199.00,2,378.00
+TX-0010,alice@example.com,2026-05-09T15:25:00,mobile,regular,smartwatch-fit,Smartwatch Fit,Wearables,1,179.00,179.00,2,378.00
+TX-0011,bob@example.com,2026-05-15T13:35:00,online,regular,tablet-air,Tablet Air,Tablets,1,549.00,549.00,3,717.00
+TX-0011,bob@example.com,2026-05-15T13:35:00,online,regular,4k-webcam,4K Webcam,Cameras,1,119.00,119.00,3,717.00
+TX-0011,bob@example.com,2026-05-15T13:35:00,online,regular,usb-c-hub,USB-C Hub,Accessories,1,49.00,49.00,3,717.00

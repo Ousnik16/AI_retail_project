@@ -1,0 +1,11 @@
+sku,name,category,price,brand,inventory_quantity,tags
+laptop-pro-15,Laptop Pro 15,Computers,1299.00,Apex,32,laptop productivity premium
+wireless-mouse,Wireless Mouse,Accessories,39.00,Apex,180,mouse wireless laptop
+mechanical-keyboard,Mechanical Keyboard,Accessories,89.00,KeyLab,96,keyboard gaming productivity
+laptop-bag,Laptop Bag,Bags,59.00,CarryCo,74,bag laptop travel
+gaming-monitor,Gaming Monitor,Displays,329.00,PixelForge,46,monitor gaming display
+noise-cancelling-headphones,Noise Cancelling Headphones,Audio,199.00,SoundCore,88,headphones audio travel
+usb-c-hub,USB-C Hub,Accessories,49.00,PortWorks,140,hub usb-c laptop
+smartwatch-fit,Smartwatch Fit,Wearables,179.00,Pulse,70,watch fitness mobile
+4k-webcam,4K Webcam,Cameras,119.00,Streamio,62,webcam remote-work video
+tablet-air,Tablet Air,Tablets,549.00,Apex,38,tablet mobile creative
