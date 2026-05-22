@@ -44,7 +44,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={protectedRoute(<Dashboard roles={user.roles} />)} />
-            <Route path="/products" element={protectedRoute(<Products roles={user.roles} />)} />
+            <Route path="/products" element={protectedRoute(<Products roles={user.roles} user={user} />)} />
             <Route path="/customers" element={protectedRoute(<Customers />, ['admin'])} />
             <Route path="/pipeline" element={protectedRoute(<Pipeline />, ['admin'])} />
             <Route path="/recommendations" element={protectedRoute(<Recommendations user={user} />)} />

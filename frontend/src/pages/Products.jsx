@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createProduct, deleteProduct, fetchProducts, getApiErrorMessage, updateProduct } from '../api/api'
+import { createProduct, deleteProduct, fetchProducts, getApiErrorMessage, ingestTransaction, updateProduct } from '../api/api'
 
 const blankProduct = {
   sku: '',
@@ -33,7 +33,7 @@ function toProductPayload(values) {
   }
 }
 
-export default function Products({ roles = [] }) {
+export default function Products({ roles = [], user = null }) {
   const [products, setProducts] = useState([])
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
@@ -42,6 +42,8 @@ export default function Products({ roles = [] }) {
   const [editForm, setEditForm] = useState(blankProduct)
   const [status, setStatus] = useState('')
   const isAdmin = roles.includes('admin')
+  const isCustomer = roles.includes('customer')
+  const customerId = user?.email || user?.id || ''
 
   const loadProducts = () => {
     fetchProducts().then((res) => setProducts(res.data)).catch(() => setProducts([]))
@@ -114,6 +116,36 @@ export default function Products({ roles = [] }) {
     }
   }
 
+  const handlePurchase = async (product) => {
+    const productId = product.sku || product.id
+
+    if (!customerId) {
+      setStatus('Unable to identify the customer account for this purchase.')
+      return
+    }
+
+    setStatus('')
+    try {
+      await ingestTransaction({
+        user_id: customerId,
+        channel: 'online',
+        items: [
+          {
+            product_id: productId,
+            name: product.name,
+            category: product.category || 'General',
+            quantity: 1,
+            unit_price: Number(product.price || 0),
+          },
+        ],
+      })
+      setStatus(`${product.name} purchased. Your recommendations will use this order now.`)
+      loadProducts()
+    } catch (err) {
+      setStatus(getApiErrorMessage(err, 'Unable to complete purchase.'))
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -158,6 +190,12 @@ export default function Products({ roles = [] }) {
           </div>
           {status && <p className="mt-3 text-sm text-slate-600">{status}</p>}
         </form>
+      )}
+
+      {!isAdmin && status && (
+        <div className="rounded-lg border border-cyan-100 bg-cyan-50 px-4 py-3 text-sm text-cyan-900">
+          {status}
+        </div>
       )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -228,6 +266,17 @@ export default function Products({ roles = [] }) {
                           Delete product
                         </button>
                       </div>
+                    )}
+
+                    {isCustomer && !isAdmin && (
+                      <button
+                        className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                        type="button"
+                        disabled={inventory <= 0}
+                        onClick={() => handlePurchase(product)}
+                      >
+                        {inventory <= 0 ? 'Out of stock' : 'Buy now'}
+                      </button>
                     )}
                   </>
                 )}
