@@ -50,7 +50,7 @@ function App() {
             <Route path="/recommendations" element={protectedRoute(<Recommendations user={user} />)} />
             <Route path="/forecasting" element={protectedRoute(<Forecasting />, ['admin'])} />
             <Route path="/insights" element={protectedRoute(<Insights user={user} />)} />
-            <Route path="/reviews" element={protectedRoute(<Reviews />, ['admin'])} />
+            <Route path="/reviews" element={protectedRoute(<Reviews user={user} />, ['admin', 'customer'])} />
             <Route path="/*" element={<Navigate to={token ? '/dashboard' : '/login'} />} />
           </Routes>
         </main>

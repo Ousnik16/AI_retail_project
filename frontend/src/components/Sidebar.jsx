@@ -7,7 +7,7 @@ const links = [
   { label: 'Retail Pipeline', path: '/pipeline', roles: ['admin'] },
   { label: 'Recommendations', path: '/recommendations', roles: ['admin', 'customer'] },
   { label: 'Forecasting', path: '/forecasting', roles: ['admin'] },
-  { label: 'Reviews', path: '/reviews', roles: ['admin'] },
+  { label: 'Reviews', path: '/reviews', roles: ['admin', 'customer'] },
   { label: 'AI Insights', path: '/insights', roles: ['admin', 'customer'] },
 ]
 

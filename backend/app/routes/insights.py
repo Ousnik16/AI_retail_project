@@ -6,4 +6,4 @@ router = APIRouter()
 
 @router.get("/summary")
 async def retail_summary(question: str = "Generate a monthly retail summary", user=Depends(get_current_user)):
-    return await LLMInsightsService.generate_insight(question)
+    return await LLMInsightsService.generate_insight(question, user)

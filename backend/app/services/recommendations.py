@@ -13,11 +13,7 @@ OFFER_RULES = {
     "gaming": ["Gaming Monitor", "Mechanical Keyboard", "Wireless Mouse"],
 }
 
-FALLBACK_RECOMMENDATIONS = [
-    {"product_id": "wireless-mouse", "name": "Wireless Mouse", "reason": "Frequently bought with laptops"},
-    {"product_id": "mechanical-keyboard", "name": "Mechanical Keyboard", "reason": "Preferred by tech enthusiast customers"},
-    {"product_id": "laptop-bag", "name": "Laptop Bag", "reason": "Personalized laptop bundle offer"},
-]
+FALLBACK_RECOMMENDATIONS = []
 
 class RecommendationService:
     @staticmethod
@@ -31,6 +27,7 @@ class RecommendationService:
                     {
                         "id": doc.get("sku", str(doc["_id"])),
                         "name": doc["name"],
+                        "price": doc.get("price", 0.0),
                         "category": doc.get("category", ""),
                         "brand": doc.get("brand", ""),
                         "tags": doc.get("tags", []),
@@ -39,15 +36,29 @@ class RecommendationService:
                 )
         except (PyMongoError, RuntimeError):
             products = []
-
+        # If products collection is empty, derive product entries from historical transactions
         if not products:
-            products = [
-                {"id": "laptop-pro-15", "name": "Laptop Pro 15", "category": "Computers", "brand": "Apex", "price": 1299.0, "tags": ["laptop", "productivity", "premium"], "tags_text": "laptop productivity premium"},
-                {"id": "wireless-mouse", "name": "Wireless Mouse", "category": "Accessories", "brand": "Apex", "price": 39.0, "tags": ["mouse", "wireless", "laptop"], "tags_text": "mouse wireless laptop"},
-                {"id": "mechanical-keyboard", "name": "Mechanical Keyboard", "category": "Accessories", "brand": "KeyLab", "price": 89.0, "tags": ["keyboard", "gaming", "accessory"], "tags_text": "keyboard gaming accessory"},
-                {"id": "laptop-bag", "name": "Laptop Bag", "category": "Bags", "brand": "CarryCo", "price": 59.0, "tags": ["bag", "laptop", "travel"], "tags_text": "bag laptop travel"},
-                {"id": "gaming-monitor", "name": "Gaming Monitor", "category": "Displays", "brand": "PixelForge", "price": 329.0, "tags": ["monitor", "gaming", "display"], "tags_text": "monitor gaming display"},
-            ]
+            try:
+                transactions = get_collection("transactions")
+                pipeline = [
+                    {"$unwind": "$products"},
+                    {"$group": {"_id": "$products.product_id", "name": {"$first": "$products.name"}, "category": {"$first": "$products.category"}, "price": {"$first": "$products.unit_price"}}},
+                ]
+                derived = await transactions.aggregate(pipeline).to_list(length=1000)
+                for item in derived:
+                    products.append(
+                        {
+                            "id": item["_id"],
+                            "name": item.get("name", item["_id"]),
+                            "price": float(item.get("price") or 0.0),
+                            "category": item.get("category", ""),
+                            "brand": "",
+                            "tags": [],
+                            "tags_text": "",
+                        }
+                    )
+            except (PyMongoError, RuntimeError):
+                products = []
         return products
 
     @staticmethod
@@ -200,6 +211,7 @@ class RecommendationService:
                                 "name": product["name"],
                                 "category": product.get("category", ""),
                                 "reason": "Popular product you have not purchased yet",
+                                "price": product.get("price", 0.0),
                                 "score": popularity.get(product["id"], 0),
                             }
                             for product in products
@@ -245,8 +257,8 @@ class RecommendationService:
 
         return {
             "user_id": user_id,
-            "recommendations": FALLBACK_RECOMMENDATIONS,
-            "personalized_offers": ["Mouse + Keyboard bundle", "Laptop Bag 15% off", "Monitor upgrade deal"],
+            "recommendations": [],
+            "personalized_offers": [],
             "user_profile": {"orders": 0, "total_spent": 0.0, "top_categories": [], "top_brands": [], "favorite_category": None},
             "recent_purchases": [],
         }

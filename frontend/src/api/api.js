@@ -89,8 +89,26 @@ export async function createProduct(payload) {
   return api.post('/products', payload)
 }
 
+export async function updateProduct(productId, payload) {
+  return api.put(`/products/${productId}`, payload)
+}
+
+export async function deleteProduct(productId) {
+  return api.delete(`/products/${productId}`)
+}
+
 export async function fetchReviewSentiment() {
   return api.get('/reviews/sentiment')
+}
+
+export async function createReview(payload) {
+  return api.post('/reviews/', payload)
+}
+
+export async function fetchReviewInsights(question, userId = null) {
+  const params = { question }
+  if (userId) params.user_id = userId
+  return api.get('/reviews/insights', { params })
 }
 
 export async function ingestTransaction(payload) {
@@ -103,6 +121,10 @@ export async function ingestOnlineOrder(payload) {
 
 export async function ingestBrowsingEvent(payload) {
   return api.post('/transactions/browse', payload)
+}
+
+export async function updateInventory(updates) {
+  return api.post('/transactions/inventory', updates)
 }
 
 export async function fetchStreamEvents() {

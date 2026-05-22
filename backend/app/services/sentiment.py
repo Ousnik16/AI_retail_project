@@ -1,5 +1,5 @@
-from app.db.database import get_collection
 from transformers import pipeline
+from app.services.reviews import ReviewService
 
 POSITIVE_WORDS = {"great", "excellent", "perfect", "fast", "smooth", "comfortable", "reliable", "strong"}
 NEGATIVE_WORDS = {"bad", "poor", "slow", "warm", "broken", "weak", "late", "difficult"}
@@ -14,12 +14,8 @@ def _fallback_sentiment(text: str) -> dict:
 
 class SentimentService:
     @staticmethod
-    async def analyze_reviews():
-        collection = get_collection("reviews")
-        cursor = collection.find({})
-        reviews = []
-        async for review in cursor:
-            reviews.append(review)
+    async def analyze_reviews(user_id: str | None = None):
+        reviews = await ReviewService.list_reviews(user_id)
         if not reviews:
             return {"sentiment": []}
         try:
@@ -28,11 +24,16 @@ class SentimentService:
             sentiment_pipeline = None
         results = []
         for review in reviews:
-            analysis = sentiment_pipeline(review["review_text"][:512])[0] if sentiment_pipeline else _fallback_sentiment(review["review_text"])
+            text = review.get("review_text", "")
+            analysis = sentiment_pipeline(text[:512])[0] if sentiment_pipeline else _fallback_sentiment(text)
             results.append({
-                "product_id": review["product_id"],
-                "review_id": str(review["_id"]),
-                "label": analysis["label"],
-                "score": analysis["score"],
+                "product_id": review.get("product_id"),
+                "review_id": str(review.get("_id")),
+                "user_id": review.get("user_id"),
+                "label": analysis.get("label"),
+                "score": analysis.get("score"),
+                "rating": review.get("rating"),
+                "title": review.get("title"),
+                "review_text": text,
             })
         return {"sentiment": results}

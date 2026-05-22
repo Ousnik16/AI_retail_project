@@ -1,25 +1,39 @@
-version: "3.9"
 services:
   backend:
     build:
       context: ./backend
+    container_name: retail-ai-backend
+    env_file:
+      - ./backend/.env
     ports:
       - "8000:8000"
     environment:
-      - MONGO_URI=${MONGO_URI}
-      - MONGO_DB=${MONGO_DB}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - CORS_ORIGINS=http://localhost:3000
-    volumes:
-      - ./backend/app:/app/app
+      CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"]'
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+    restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    container_name: retail-ai-frontend
     ports:
-      - "3000:3000"
-    environment:
-      - VITE_API_URL=http://localhost:8000/api
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    container_name: retail-ai-mongo
+    profiles:
+      - local-db
+    ports:
+      - "27017:27017"
     volumes:
-      - ./frontend:/app
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo-data:

@@ -11,11 +11,14 @@ from app.routes import auth, users, products, transactions, analytics, recommend
 from app.utils.responses import error_response
 import json
 
-api = FastAPI(
+app = FastAPI(
     title="Smart Retail Intelligence API",
     description="AI-powered retail analytics, recommendations, forecasting, and customer intelligence.",
     version="1.0.0",
 )
+
+# Backward-compatible alias for code that imports `api` directly.
+api = app
 
 def _normalize_origins(origins) -> list[str]:
     if origins is None:
@@ -88,8 +91,9 @@ async def database_exception_handler(request, exc):
         content=error_response("Database is unavailable. Check your MongoDB connection and try again."),
     )
 
-app = CORSMiddleware(
-    api,
+# Apply CORS middleware to the FastAPI app
+api.add_middleware(
+    CORSMiddleware,
     allow_origins=normalized_origins,
     allow_credentials=True,
     allow_methods=["*"],

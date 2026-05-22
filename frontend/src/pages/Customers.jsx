@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchCustomerInsights } from '../api/api'
+import { fetchCustomerInsights, fetchReviewInsights } from '../api/api'
 
 export default function Customers() {
   const [segments, setSegments] = useState([])
@@ -7,6 +7,21 @@ export default function Customers() {
   useEffect(() => {
     fetchCustomerInsights().then((res) => setSegments(res.data.customer_segments || [])).catch(() => {})
   }, [])
+
+  const [insights, setInsights] = useState({})
+  const [loadingInsight, setLoadingInsight] = useState(null)
+
+  const loadCustomerInsight = async (userId) => {
+    setLoadingInsight(userId)
+    try {
+      const res = await fetchReviewInsights(`Generate review insights for ${userId}`, userId)
+      setInsights((s) => ({ ...s, [userId]: res.data }))
+    } catch (e) {
+      setInsights((s) => ({ ...s, [userId]: { insight: 'Unable to generate insights.' } }))
+    } finally {
+      setLoadingInsight(null)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -42,6 +57,21 @@ export default function Customers() {
               <div className="rounded-lg bg-slate-50 p-3 sm:col-span-2">
                 <dt className="text-slate-500">Seasonal behaviour</dt>
                 <dd className="font-semibold">{customer.seasonal_behaviour || 'Not enough seasonal data yet'}</dd>
+              </div>
+              <div className="sm:col-span-2">
+                <button
+                  className="mt-3 rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white"
+                  onClick={() => loadCustomerInsight(customer.user_id)}
+                >
+                  {loadingInsight === customer.user_id ? 'Thinking...' : 'Analyze reviews for this customer'}
+                </button>
+
+                {insights[customer.user_id]?.insight && (
+                  <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm">
+                    <div className="font-semibold">Review-driven insight</div>
+                    <div className="mt-2">{insights[customer.user_id].insight}</div>
+                  </div>
+                )}
               </div>
             </dl>
           </div>

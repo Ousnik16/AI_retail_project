@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react'
-import { fetchInsights } from '../api/api'
+import { fetchInsights, ingestTransaction } from '../api/api'
 
-const prompts = [
+const adminPrompts = [
   'Generate a monthly retail summary',
   'Which customer segment should we target this week?',
   'Which products are at risk of inventory shortages?',
   'Create a product performance report with bundle ideas',
+]
+
+const customerPrompts = [
+  'What products should I consider next?',
+  'Help me compare products before buying',
+  'Which accessories may go well with my purchase?',
+  'How can I choose the best category for my needs?',
 ]
 
 function stripMarkdown(value = '') {
@@ -101,6 +108,8 @@ function InsightOutput({ text }) {
 }
 
 export default function Insights({ user }) {
+  const isAdmin = user?.roles?.includes('admin')
+  const prompts = isAdmin ? adminPrompts : customerPrompts
   const [question, setQuestion] = useState(prompts[0])
   const [insight, setInsight] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -119,6 +128,41 @@ export default function Insights({ user }) {
     }
   }
 
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionMessage, setActionMessage] = useState('')
+
+  const executeAction = async (action) => {
+    setActionMessage('')
+    setActionLoading(true)
+    try {
+      if (action.type === 'add_to_cart') {
+        const payload = {
+          user_id: user?.email || 'customer@retail.ai',
+          channel: 'online',
+          items: [
+            {
+              product_id: action.payload.product_id,
+              name: action.payload.name,
+              category: action.payload.category || 'General',
+              quantity: action.payload.quantity || 1,
+              unit_price: action.payload.unit_price || action.payload.price || 0,
+            },
+          ],
+        }
+        await ingestTransaction(payload)
+        setActionMessage(`Added ${action.payload.name || action.payload.product_id} to purchases.`)
+      } else if (action.type === 'promote_bundle') {
+        setActionMessage('Bundle promotion created (simulated).')
+      } else {
+        setActionMessage('Action executed.')
+      }
+    } catch (e) {
+      setActionMessage('Unable to execute action.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   useEffect(() => {
     ask(prompts[0])
   }, [])
@@ -126,8 +170,10 @@ export default function Insights({ user }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">LLM Retail Insights</h2>
-        <p className="mt-1 text-sm text-slate-500">Ask dynamic questions over sales, customers, baskets, products, and inventory.</p>
+        <h2 className="text-2xl font-semibold">{isAdmin ? 'LLM Retail Insights' : 'Shopping Assistant'}</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          {isAdmin ? 'Ask dynamic questions over sales, customers, baskets, products, and inventory.' : 'Ask product, category, comparison, and shopping-fit questions.'}
+        </p>
       </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -156,7 +202,7 @@ export default function Insights({ user }) {
             className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-cyan-500"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Ask about sales, customers, inventory, or recommendations"
+            placeholder={isAdmin ? 'Ask about sales, customers, inventory, or recommendations' : 'Ask about products, comparisons, or what fits your needs'}
           />
           <button className="rounded-lg bg-slate-950 px-5 py-3 font-semibold text-white hover:bg-slate-800" disabled={loading}>
             {loading ? 'Thinking...' : 'Ask AI'}
@@ -186,11 +232,29 @@ export default function Insights({ user }) {
             ) : (
               <InsightOutput text={insight?.insight} />
             )}
+            {insight?.actions?.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold">Suggested actions</h4>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {insight.actions.map((action, idx) => (
+                    <button
+                      key={idx}
+                      className="rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white"
+                      onClick={() => executeAction(action)}
+                      disabled={actionLoading}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+                {actionMessage && <div className="mt-3 text-sm text-slate-700">{actionMessage}</div>}
+              </div>
+            )}
             {insight?.warning && <p className="mt-5 rounded-lg bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-700">{insight.warning}</p>}
           </div>
         </div>
 
-        <div className="space-y-6">
+        {isAdmin && <div className="space-y-6">
           <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <h3 className="text-lg font-semibold">Context Used</h3>
             <div className="mt-4 grid grid-cols-2 gap-3">
@@ -232,7 +296,7 @@ export default function Insights({ user }) {
               {!topProducts.length && <p className="text-sm text-slate-500">No product signals available yet.</p>}
             </div>
           </div>
-        </div>
+        </div>}
       </section>
     </div>
   )

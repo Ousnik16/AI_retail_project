@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
+
 
 class UserProfile(BaseModel):
     orders: int
@@ -12,7 +13,7 @@ class RecentPurchase(BaseModel):
     product_id: str
     name: str
     quantity: int
-    purchased_at: str
+    purchased_at: Optional[Any]
 
 class RecommendationResponse(BaseModel):
     user_id: str

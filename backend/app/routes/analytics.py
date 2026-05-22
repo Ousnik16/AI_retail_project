@@ -14,6 +14,9 @@ async def sales_summary(user=Depends(get_current_user)):
 
 @router.get("/dashboard")
 async def dashboard_overview(user=Depends(get_current_user)):
+    if "admin" not in user.get("roles", []):
+        user_id = user.get("email") or user.get("user_id")
+        return await AnalyticsService.customer_spending_overview(user_id)
     return await AnalyticsService.dashboard_overview()
 
 @router.get("/top-products")

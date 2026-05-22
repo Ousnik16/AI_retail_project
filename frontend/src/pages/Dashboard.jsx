@@ -1,6 +1,20 @@
 import { useEffect, useState } from 'react'
 import { fetchDashboardOverview } from '../api/api'
 import Card from '../components/Card'
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend,
+} from 'recharts'
 
 const emptyOverview = {
   total_sales: 0,
@@ -10,6 +24,10 @@ const emptyOverview = {
   top_selling_products: [],
   basket_analysis: [],
   recommendation_performance: {},
+  total_spent: 0,
+  average_order: 0,
+  spending_by_day: [],
+  spending_by_category: [],
 }
 
 export default function Dashboard({ roles = [] }) {
@@ -23,37 +41,108 @@ export default function Dashboard({ roles = [] }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">Dashboard & Analytics</h2>
+        <h2 className="text-2xl font-semibold">{isAdmin ? 'Dashboard & Analytics' : 'My Shopping Dashboard'}</h2>
         <p className="mt-1 text-sm text-slate-500">
           {isAdmin
             ? 'Sales, customers, top products, basket analysis, and recommendation performance.'
-            : 'Your retail overview, recommended products, and AI-assisted shopping intelligence.'}
+            : 'Track your orders, spending trend, and category preferences.'}
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <Card title="Total Sales" value={`$${Number(overview.total_sales || 0).toFixed(2)}`} />
-        <Card title="Orders" value={overview.order_count || 0} />
-        <Card title={isAdmin ? 'Active Users' : 'Customer Segments'} value={overview.active_users || 0} />
-        <Card title="Offer Conversion" value={`${Math.round((overview.recommendation_performance.conversion_rate || 0) * 100)}%`} />
-      </div>
+      {isAdmin ? (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <Card title="Total Sales" value={`$${Number(overview.total_sales || 0).toFixed(2)}`} />
+          <Card title="Orders" value={overview.order_count || 0} />
+          <Card title="Active Users" value={overview.active_users || 0} />
+          <Card title="Offer Conversion" value={`${Math.round((overview.recommendation_performance.conversion_rate || 0) * 100)}%`} />
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <Card title="Total Spent" value={`$${Number(overview.total_spent || 0).toFixed(2)}`} />
+          <Card title="Orders" value={overview.order_count || 0} />
+          <Card title="Average Order" value={`$${Number(overview.average_order || 0).toFixed(2)}`} />
+          <Card title="Categories" value={(overview.spending_by_category || []).length} />
+        </div>
+      )}
 
-      <div className="grid gap-6 xl:grid-cols-3">
+      {!isAdmin && (
+        <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-semibold">My Spending Trend</h3>
+            <div className="mt-4 h-64">
+              <ResponsiveContainer>
+                <LineChart data={overview.spending_by_day || []}>
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                  <YAxis tickFormatter={(v) => `$${v}`} />
+                  <Tooltip formatter={(v) => `$${Number(v).toFixed(2)}`} />
+                  <Line type="monotone" dataKey="total_sales" name="Spent" stroke="#06b6d4" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-semibold">Spending by Category</h3>
+            <div className="mt-4 h-64">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={overview.spending_by_category || []} dataKey="total_spent" nameKey="category" outerRadius={82} fill="#8884d8">
+                    {(overview.spending_by_category || []).map((entry, index) => (
+                      <Cell key={`customer-cell-${index}`} fill={["#06b6d4", "#0ea5a4", "#7c3aed", "#f97316"][index % 4]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => `$${Number(v).toFixed(2)}`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {isAdmin && <div className="grid gap-6 xl:grid-cols-3">
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
-          <h3 className="text-lg font-semibold">Top-Selling Products</h3>
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-100">
-            {overview.top_selling_products.map((product) => (
-              <div key={product.product_id} className="grid grid-cols-[1fr_auto] gap-4 border-b border-slate-100 p-4 last:border-b-0">
-                <div>
-                  <p className="font-medium text-slate-900">{product.name || product.product_id}</p>
-                  <p className="text-sm text-slate-500">{product.category || 'Retail product'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">{product.units} units</p>
-                  <p className="text-sm text-slate-500">${Number(product.revenue || 0).toFixed(0)}</p>
-                </div>
+          <h3 className="text-lg font-semibold">Sales (last 30 days)</h3>
+          <div className="mt-4 h-56">
+            <ResponsiveContainer>
+              <LineChart data={overview.sales_by_day || []}>
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                <YAxis tickFormatter={(v) => `$${v}`} />
+                <Tooltip formatter={(v) => `$${Number(v).toFixed(2)}`} />
+                <Line type="monotone" dataKey="total_sales" stroke="#06b6d4" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="rounded-lg border border-slate-100 p-4">
+              <h4 className="text-sm font-medium">Spending by Category</h4>
+              <div className="mt-2 h-40">
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie data={overview.spending_by_category || []} dataKey="total_spent" nameKey="category" outerRadius={60} fill="#8884d8">
+                      {(overview.spending_by_category || []).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={["#06b6d4", "#0ea5a4", "#7c3aed", "#f97316"][index % 4]} />
+                      ))}
+                    </Pie>
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            ))}
+            </div>
+
+            <div className="rounded-lg border border-slate-100 p-4">
+              <h4 className="text-sm font-medium">Top Products (units)</h4>
+              <div className="mt-2 h-40">
+                <ResponsiveContainer>
+                  <BarChart data={overview.top_selling_products || []} layout="vertical">
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={150} />
+                    <Tooltip formatter={(v) => `${v} units`} />
+                    <Bar dataKey="units" fill="#06b6d4" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -74,9 +163,9 @@ export default function Dashboard({ roles = [] }) {
             </div>
           </dl>
         </section>
-      </div>
+      </div>}
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      {isAdmin && <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="text-lg font-semibold">Customer Insights</h3>
           <div className="mt-4 space-y-3">
@@ -102,7 +191,7 @@ export default function Dashboard({ roles = [] }) {
             ))}
           </div>
         </section>
-      </div>
+      </div>}
     </div>
   )
 }
